@@ -2,7 +2,7 @@ package com.customer.account.service;
 
 import com.customer.account.TestSupport;
 import com.customer.account.dto.CustomerDto;
-import com.customer.account.dto.CustomerDtoConverter;
+import com.customer.account.dto.converter.CustomerDtoConverter;
 import com.customer.account.exception.CustomerNotFoundException;
 import com.customer.account.model.Customer;
 import com.customer.account.repository.CustomerRepository;
