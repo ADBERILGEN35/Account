@@ -1,20 +1,22 @@
 package com.customer.account;
 
-import com.customer.account.model.Account;
 import com.customer.account.model.Customer;
 import com.customer.account.repository.CustomerRepository;
-import kotlin.collections.SetsKt;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.info.License;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
+import java.time.Clock;
 
 @SpringBootApplication
 public class AccountApplication implements CommandLineRunner {
+
+    private final CustomerRepository customerRepository;
 
     public AccountApplication(CustomerRepository customerRepository) {
         this.customerRepository = customerRepository;
@@ -24,12 +26,30 @@ public class AccountApplication implements CommandLineRunner {
         SpringApplication.run(AccountApplication.class, args);
     }
 
-    private final CustomerRepository customerRepository;
+    @Bean
+    public OpenAPI customOpenAPI(@Value("${application-description}") String description,
+                                 @Value("${application-version}") String version) {
+        return new OpenAPI()
+                .info(new Info()
+                        .title("Account API")
+                        .version(version)
+                        .description(description)
+                        .license(new License().name("Account API Licence")));
+    }
 
+    @Bean
+    public Clock clock() {
+        return Clock.systemUTC();
+    }
 
     @Override
-    public void run(String... args) throws Exception {
-        Customer customer = customerRepository.save(new Customer("", "Oğuzhan", "Taşyaran", new HashSet<>()));
+    public void run(String... args) {
+        Customer customer = customerRepository.save(new Customer("Oguzhan", "Tasyaran"));
+        Customer customer2 = customerRepository.save(new Customer("Deneme", "Deneme"));
+
         System.out.println(customer);
+        System.out.println(customer2);
+
     }
+
 }

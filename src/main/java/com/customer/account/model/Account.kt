@@ -5,7 +5,7 @@ import java.math.BigDecimal
 import java.time.LocalDateTime
 import javax.persistence.*
 
-
+@Entity
 data class Account(
 
     @Id

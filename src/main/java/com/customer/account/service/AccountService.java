@@ -1,7 +1,7 @@
 package com.customer.account.service;
 
 import com.customer.account.dto.AccountDto;
-import com.customer.account.dto.AccountDtoConverter;
+import com.customer.account.dto.converter.AccountDtoConverter;
 import com.customer.account.dto.CreateAccountRequest;
 import com.customer.account.model.Account;
 import com.customer.account.model.Customer;
@@ -10,6 +10,8 @@ import com.customer.account.repository.AccountRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Service
@@ -17,14 +19,16 @@ public class AccountService {
 
     private final AccountRepository accountRepository;
     private final CustomerService customerService;
-    private final AccountDtoConverter accountDtoConverter;
+    private final AccountDtoConverter converter;
+    private final Clock clock;
 
     public AccountService(AccountRepository accountRepository,
                           CustomerService customerService,
-                          AccountDtoConverter accountDtoConverter) {
+                          AccountDtoConverter converter, Clock clock) {
         this.accountRepository = accountRepository;
         this.customerService = customerService;
-        this.accountDtoConverter = accountDtoConverter;
+        this.converter = converter;
+        this.clock = clock;
     }
 
     public AccountDto createAccount(CreateAccountRequest createAccountRequest) {
@@ -33,13 +37,23 @@ public class AccountService {
         Account account = new Account(
                 customer,
                 createAccountRequest.getInitialCredit(),
-                LocalDateTime.now());
+                getLocalDateTimeNow());
 
         if (createAccountRequest.getInitialCredit().compareTo(BigDecimal.ZERO) > 0) {
-            // Transaction transaction = transactionService.initiateMoney(account, createAccountRequest.getInitialCredit());
-            Transaction transaction = new Transaction(createAccountRequest.getInitialCredit(), account);
+            Transaction transaction = new Transaction(
+                    createAccountRequest.getInitialCredit(),
+                    getLocalDateTimeNow(),
+                    account);
+
             account.getTransaction().add(transaction);
         }
-        return accountDtoConverter.converter(accountRepository.save(account));
-
+        return converter.convert(accountRepository.save(account));
     }
+
+    private LocalDateTime getLocalDateTimeNow() {
+        Instant instant = clock.instant();
+        return LocalDateTime.ofInstant(
+                instant,
+                Clock.systemDefaultZone().getZone());
+    }
+}
